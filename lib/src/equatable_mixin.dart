@@ -3,6 +3,8 @@ import 'package:equatable/src/equatable_config.dart';
 import 'package:equatable/src/equatable_utils.dart';
 import 'package:meta/meta.dart';
 
+bool debugEquatable = false;
+
 /// A mixin that helps implement equality
 /// without needing to explicitly override [operator ==] and [hashCode].
 ///
@@ -19,11 +21,25 @@ mixin EquatableMixin {
 
   @override
   bool operator ==(Object other) {
+    if (debugEquatable) {
+      print('other is EquatableMixin: ${other is EquatableMixin}');
+      print(
+        '!checkRuntimeTypeOnIdentical || runtimeType == other.runtimeType: ${other is EquatableMixin}',
+      );
+      print(
+        'iterableEquals(props, other.props): ${iterableEquals(props, (other as EquatableMixin).props)}',
+      );
+    }
+
     return identical(this, other) ||
         other is EquatableMixin &&
-            runtimeType == other.runtimeType &&
+            (!checkRuntimeTypeOnIdentical ||
+                runtimeType == other.runtimeType) &&
             iterableEquals(props, other.props);
   }
+
+  /// Whether to check runtimeType in order to consider two objects equal.
+  bool get checkRuntimeTypeOnIdentical => true;
 
   @override
   int get hashCode => runtimeType.hashCode ^ mapPropsToHashCode(props);
